@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const Model = require('../models/User');
-const mongoose = require('../utils/mongoose')
+// const mongoose = require('../utils/mongoose')
 const jwt = require('passport-jwt')
 const Auth = require('./../middlewares/Auth')
 

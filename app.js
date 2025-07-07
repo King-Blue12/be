@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 var User = require('./models/User');
 
 //
-const mongoose = require('./utils/mongoose');
+// const mongoose = require('./utils/mongoose');
 const constants = require('./utils/constants')
 
 //
@@ -19,12 +19,12 @@ app.use(compression());
 app.use(helmet());
 app.use(cors());
 
-mongoose.connect(constants.mongoUrl);
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', () => {
-    console.log('Mongoose connected.');
-});
+// mongoose.connect(constants.mongoUrl);
+// const db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', () => {
+//     console.log('Mongoose connected.');
+// });
 
 
 // view engine setup
