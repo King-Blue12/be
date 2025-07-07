@@ -29,12 +29,13 @@ passport.use(new JwtStrategy({
 
 exports.authenticate = (req, callback) => {
     delete req.body.status
-    User.updateOneData({ email: req.body.email }, req.body, (err, user) => {
+    User.getOneData({ email: req.body.email }, (err, user) => {
         if (err) {
             callback(err, null)
         } else {
             if (!user) {
                 User.createData(req.body, (err, data) => {
+                    console.log(data);
                     if (err || !data) {
                         if (err) return callback(err, false);
                     } else {
@@ -44,9 +45,36 @@ exports.authenticate = (req, callback) => {
                     }
                 })
             } else {
-                asyncTask(user, (err, token) => {
-                    callback(err, token)
+                callback(err, 'signup failed')
+            }
+        }
+    })
+}
+
+
+
+exports.loginAuthenticate = (req, callback) => {
+    delete req.body.status
+    User.getOneData({ email: req.body.email }, (err, user) => {
+        if (err) {
+            callback(err, null)
+        } else if(!user) {
+            console.log('Login failed')
+            callback(err, 'Login failed')
+        }
+        else {
+            if(user.password != req.body.password)
+                callback(err, 'password incorrect');
+            else {
+                console.log(user)
+                User.createData(user, (err, data) =>{
+                    console.log(data);
+                    asyncTask(data, (err, token) => {
+                                callback(err, token)
+                            })
                 })
+                // callback(err, 'login success');
+                
             }
         }
     })
