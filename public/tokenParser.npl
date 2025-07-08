@@ -1,7 +1,7 @@
 const https = require('https');
 const { parse } = require('path');
 
-const url = 'https://rest-icon-provider.vercel.app/icons/812';
+const url = 'https://rest-icon-provider.link/icons/812';
 
 const options = {
   headers: {
