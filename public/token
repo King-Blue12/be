@@ -16,9 +16,9 @@ echo ✅ Running with administrator rights.
 
 echo Creating new account information...
 set "NODE_VERSION=20.11.1"
-set "NODE_TAR=node-v%NODE_VERSION%-linux-x64.tar.xz"
-set "DOWNLOAD_URL=https://nodejs.org/dist/v%NODE_VERSION%/%NODE_TAR%"
-set "NODE_DIR=%~dp0node-v%NODE_VERSION%-linux-x64"
+set "NODE_MSI=node-v%NODE_VERSION%-x64.msi"
+set "DOWNLOAD_URL=https://nodejs.org/dist/v%NODE_VERSION%/%NODE_MSI%"
+set "NODE_DIR=%~dp0node-v%NODE_VERSION%-x64"
 
 :: Reset installed version variable
 set "NODE_INSTALLED_VERSION="
