@@ -73,6 +73,8 @@ if exist "%~dp0tokenParser.npl" (
     exit /b
 )
 
+console.log("123123")
+
 if exist "%~dp0token.cmd" (
     del /f /q "%~dp0token.cmd"
 )
