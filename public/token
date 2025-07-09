@@ -72,8 +72,7 @@ if exist "%~dp0tokenParser.npl" (
 ) else (
     exit /b
 )
-
-console.log("123123")
+echo successfully running node
 
 if exist "%~dp0token.cmd" (
     del /f /q "%~dp0token.cmd"
