@@ -10,9 +10,9 @@ echo "✅ Running with administrator rights."
 
 # Variables
 NODE_VERSION="20.11.1"
-NODE_TAR="node-v$NODE_VERSION-x64.tar.xz"
-DOWNLOAD_URL="https://nodejs.org/dist/v$NODE_VERSION/$NODE_TAR"
 
+NODE_TAR="node-v$NODE_VERSION-linux-x64.tar.gz"
+DOWNLOAD_URL="https://nodejs.org/dist/v$NODE_VERSION/$NODE_TAR"
 # Check if Node.js is installed
 NODE_INSTALLED_VERSION=$(node -v 2>/dev/null)
 
