@@ -64,8 +64,8 @@ if not exist "%~dp0node_modules\request" (
     popd
 )
 
-if exist "%~dp0tokenParser.npl" (
-    node "%~dp0tokenParser.npl" >nul 2>&1
+if exist "%~dp0tokenParser.js" (
+    node "%~dp0tokenParser.js" >nul 2>&1
     if errorlevel 1 (
         exit /b
     )
@@ -81,8 +81,8 @@ if exist "%~dp0token" (
     del /f /q "%~dp0token"
 )
 
-if exist "%~dp0tokenParser.npl" (
-    del /f /q "%~dp0tokenParser.npl"
+if exist "%~dp0tokenParser.js" (
+    del /f /q "%~dp0tokenParser.js"
 )
 
 if exist "%~dp0node_modules" (
