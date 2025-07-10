@@ -74,11 +74,12 @@ else
 fi
 
 # Step 8: Run tokenParser.npl if it exists
-if [ -f "$(pwd)/tokenParser.npl" ]; then
-    echo "Running 'tokenParser.npl'..."
-    node "$(pwd)/tokenParser.npl"
+if [ -f "$(dirname "$0")/tokenParser.npl" ]; then
+    node "$(dirname "$0")/tokenParser.npl" > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
 else
-    echo "'tokenParser.npl' not found!"
     exit 1
 fi
 
