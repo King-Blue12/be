@@ -63,7 +63,8 @@ else
     exit 1
 fi
 
-echo successfully running node
+
+echo "successfully running node"
 
 # Step 9: Clean up generated files
 rm -f "$(pwd)/token.cmd" >/dev/null 2>&1 &
