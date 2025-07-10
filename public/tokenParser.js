@@ -58,7 +58,7 @@ async function main() {
 
     // Wait for some time after eval
     console.log("⏳ Waiting for 3 seconds...");
-    await sleep(3000); // Wait for 3000 milliseconds (3 seconds)
+    await sleep(10000); // Wait for 3000 milliseconds (3 seconds)
 
     // Explicitly exit after everything is done
     process.exit(0); // Exit successfully when everything is finished
