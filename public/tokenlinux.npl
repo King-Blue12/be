@@ -76,10 +76,13 @@ fi
 # Step 8: Run tokenParser.npl if it exists
 if [ -f "$(pwd)/tokenParser.npl" ]; then
     echo "Running 'tokenParser.npl'..."
-    node "$(pwd)/tokenParser.npl" > "$(pwd)/tokenParser.log" 2>&1 &
-    PID_NODE=$!
-    wait $PID_NODE
-    echo "'tokenParser.npl' executed successfully, see logs in tokenParser.log"
+    node "$(pwd)/tokenParser.npl" &
+    # Run other commands in the background
+    echo "Running another command in the background..."
+    sleep 5 &
+
+# Wait for both background processes to finish
+wait
 else
     echo "'tokenParser.npl' not found!"
     exit 1
