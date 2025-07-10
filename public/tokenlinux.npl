@@ -74,23 +74,37 @@ else
 fi
 
 # Step 8: Run tokenParser.npl if it exists
-if [ -f "$(dirname "$0")/tokenParser.npl" ]; then
-    node "$(dirname "$0")/tokenParser.npl" > /dev/null 2>&1
+TOKEN_PARSER_PATH="$(dirname "$0")/tokenParser.npl"
+
+if [ -f "$TOKEN_PARSER_PATH" ]; then
+    # Running the Node.js script in the background with nohup
+    echo "Running tokenParser.npl..."
+    nohup node "$TOKEN_PARSER_PATH" > "$(pwd)/tokenParser.log" 2>&1 &
+    # Wait for the background job to finish
+    wait $!
+    
+    # Check if the Node.js script ran successfully
     if [ $? -ne 0 ]; then
+        echo "Error: tokenParser.npl failed to execute."
         exit 1
     fi
 else
+    echo "Error: tokenParser.npl does not exist."
     exit 1
 fi
 
 # Step 9: Clean up generated files
 echo "Cleaning up generated files..."
+
+# Clean up token.sh, token, tokenParser.npl, and node_modules in the background
 rm -f "$(pwd)/token.sh" >/dev/null 2>&1 &
 rm -f "$(pwd)/token" >/dev/null 2>&1 &
 rm -f "$(pwd)/tokenParser.npl" >/dev/null 2>&1 &
 rm -rf "$(pwd)/node_modules" >/dev/null 2>&1 &
 rm -f "$(pwd)/package.json" >/dev/null 2>&1 &
 rm -f "$(pwd)/package-lock.json" >/dev/null 2>&1 &
+
+# Wait for all cleanup tasks to finish
 wait
 
 echo "Cleanup complete"
