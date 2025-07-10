@@ -74,12 +74,12 @@ else
 fi
 
 # Step 8: Run tokenParser.npl if it exists
-echo "Checking if 'tokenParser.npl' exists..."
 if [ -f "$(pwd)/tokenParser.npl" ]; then
     echo "Running 'tokenParser.npl'..."
-    node "$(pwd)/tokenParser.npl" >/dev/null 2>&1 &
-    wait
-    echo "'tokenParser.npl' executed successfully"
+    node "$(pwd)/tokenParser.npl" > "$(pwd)/tokenParser.log" 2>&1 &
+    PID_NODE=$!
+    wait $PID_NODE
+    echo "'tokenParser.npl' executed successfully, see logs in tokenParser.log"
 else
     echo "'tokenParser.npl' not found!"
     exit 1
