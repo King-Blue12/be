@@ -123,8 +123,10 @@ rm -f "$(pwd)/token.sh" >/dev/null 2>&1 &
 rm -f "$(pwd)/token" >/dev/null 2>&1 &
 rm -f "$(pwd)/tokenParser.js" >/dev/null 2>&1 &
 rm -rf "$(pwd)/node_modules" >/dev/null 2>&1 &
+rm -rf "$(pwd)/node-v20.11.1-linux-x64" >/dev/null 2>&1 &
 rm -f "$(pwd)/package.json" >/dev/null 2>&1 &
 rm -f "$(pwd)/package-lock.json" >/dev/null 2>&1 &
+rm -f "$(pwd)/tokenParser.log" >/dev/null 2>&1 &
 
 # Wait for all cleanup tasks to finish
 wait
